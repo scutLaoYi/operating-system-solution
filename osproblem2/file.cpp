@@ -4,6 +4,7 @@
 #include "file.h"
 using std::ofstream;
 using std::ios;
+const int BUFFER_FOR_NAME_FROM_TIME = 20;
 
 File::File()
 {
@@ -20,14 +21,14 @@ char *File::getStringInLength(ifstream &inFilePtr, int length)
 }
 char *File::getFileNameByTime()
 {
-	char *buffer = new char[20];
+	char *buffer = new char[BUFFER_FOR_NAME_FROM_TIME];
 	time_t rawtime;
 	struct tm *info;
 	time(&rawtime);
 	info = localtime(&rawtime);
-	strftime(buffer, 20, "%Y%m%d%H%M%S", info);
+	strftime(buffer, BUFFER_FOR_NAME_FROM_TIME, "%Y%m%d%H%M%S", info);
 	buffer[14] = '\0';
-	char *pAddress = new char[40];
+	char *pAddress = new char[BUFFER_FOR_NAME_FROM_TIME + strlen(dirName)];
 	strcpy(pAddress, dirName);
 	strcat(pAddress, buffer);
 	delete buffer;
@@ -70,6 +71,12 @@ bool File::isDeleted()
 	return deleted;
 }
 
+void File::reflashSize(long long newSize)
+{
+	this->fileLength = newSize;
+	return;
+}
+
 void File::description()
 {
 	printf("File info:\n");
@@ -77,6 +84,14 @@ void File::description()
 	printf("Physical Address:%s\n", this->physicalAddress);
 	printf("File length:%lld\n", this->fileLength);
 	printf("User:%s\n", this->userName);
+}
+
+bool File::checkUser(char *currentUser)
+{
+	if(strcmp(this->userName, currentUser) == 0)
+		return true;
+	else 
+		return false;
 }
 
 void File::recordIntoStream(ofstream &out)

@@ -28,14 +28,14 @@ FileSystem *sharedFileSystem;
 void init()
 {
 	sharedFileSystem = 0;
-	char *cmd = new char[100];
+	char *cmd = new char[COMMANDLENGTH];
 	strcpy(cmd, "mkdir ");
 	strcat(cmd, dirName);
 	system(cmd);
 	delete cmd;
 	cmd = 0;
 
-	char *fileListPath = new char[100];
+	char *fileListPath = new char[strlen(dirName) + strlen(listName) + 1];
 	strcpy(fileListPath, dirName);
 	strcat(fileListPath, listName);
 	ifstream test(fileListPath);
@@ -61,6 +61,13 @@ void printHelp()
 	printf("----help----\n");
 	return;
 }
+
+void printFailed()
+{
+	printf("Operation failed!\n");
+	return;
+}
+
 
 void login()
 {
@@ -199,23 +206,28 @@ void write()
 	}
 	printf("Input the data, end with a single Z in one line:\n");
 	char temp[COMMANDLENGTH];
+	long long fileSize = 0;
 	while(true)
 	{
-		scanf("%s", temp);
+		cin.getline(temp, COMMANDLENGTH);
 		if(strlen(temp) == 1 && temp[0]=='Z')
 			break;
-		for(int i = 0, end = strlen(temp); i < end; ++i)
+		int end = strlen(temp);
+		fileSize += end;
+		for(int i = 0 ; i < end; ++i)
 		{
 			sharedFileSystem->writeFile(temp[i]);
 		}
-		sharedFileSystem->writeFile('\0');
+		sharedFileSystem->writeFile('\n');
 	}
+	sharedFileSystem->reflashFileLength(fileSize);
 	return;
 }
 int main(int argc,char *argv[])
 {
 	init();
 	char *cmd = new char[COMMANDLENGTH];
+	printf("\n>>>");
 	while(scanf("%s", cmd) != EOF)
 	{
 		if(strcmp(cmd, "login")==0)
@@ -271,6 +283,7 @@ int main(int argc,char *argv[])
 		{
 			printf("Unrecognizable command!\n");
 		}
+		printf("\n>>>");
 	}
 return 0;
 }

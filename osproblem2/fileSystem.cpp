@@ -115,6 +115,8 @@ bool FileSystem::deleteFile(string fileName)
 		return false;
 	int index = indexMap[fileName];
 	File* nowFile = fileList->at(index);
+	if(!nowFile->checkUser(this->currentUser))
+		return false;
 	if( nowFile->removeFile())
 	{
 		--this->fileAmount;
@@ -132,12 +134,17 @@ bool FileSystem::changeCurrentFile(string fileName)
 		closeFile();
 	int index = indexMap[fileName];
 	File *file = fileList->at(index);
+	if(!file->checkUser(this->currentUser))
+		return false;
 	this->currentFile = new char[strlen(file->physicalAddress) + 1];
 	strcpy(this->currentFile, file->physicalAddress);
+	currentFileObject = file;
 	return true; 
 }
 bool FileSystem::openFile(char flag)
 {
+	if(currentFile == 0)
+		return false;
 	if(flag == 'r')
 	{
 		if(inFilePtr.is_open())
@@ -171,6 +178,15 @@ void FileSystem::closeFile()
 		delete currentFile;
 		currentFile = NULLFILE;
 	}
+	currentFileObject = 0;
+	return;
+}
+
+void FileSystem::reflashFileLength(long long length)
+{
+	if(currentFileObject == 0)
+		return;
+	currentFileObject->reflashSize(length);
 	return;
 }
 

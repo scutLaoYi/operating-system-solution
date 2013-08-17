@@ -31,6 +31,8 @@ class FileSystem
 	//get the path of the file with file name
 	//actually it just add a dir name before the file name ^_^
 	char *getRecordFileName(const char *fileName);
+	//current File object
+	File *currentFileObject;
 	
 	public:
 	//constructor, with a parameter(user name)
@@ -48,6 +50,8 @@ class FileSystem
 	bool openFile(char flag);
 	//redo
 	void closeFile();
+	//reflash the file length of current file
+	void reflashFileLength(long long);
 	//read the data stored in the current file(must open it first)
 	bool readFile();
 	//write some data into the current file(must be opened too)

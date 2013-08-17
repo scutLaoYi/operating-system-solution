@@ -37,6 +37,11 @@ class File
 	bool isDeleted();
 	//print the description of this file in command line
 	void description();
+	//reflash the file size.
+	void reflashSize(long long newSize);
+	//check whether the current user is the one who create this file
+	//return true if it's same, otherwise return false
+	bool checkUser(char *currentUser);
 	//record the file information into ofstream
 	void recordIntoStream(ofstream &out);
 	//class function which will create and return a new File object with information read from ifstream
