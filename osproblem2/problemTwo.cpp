@@ -125,7 +125,15 @@ void create()
 	printf("Input a new file name:");
 	string newFileName;
 	cin>>newFileName;
-	sharedFileSystem->createFile(newFileName);
+	if(sharedFileSystem->createFile(newFileName))
+	{
+		printf("operation success!\n");
+	}
+	else
+	{
+		printf("operation failed!\n");
+		printf("Please check if the current file has existed!\n");
+	}
 	return;
 }
 void deleteFile()

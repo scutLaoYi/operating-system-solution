@@ -90,11 +90,13 @@ void FileSystem::listFile()
 	return ;
 }
 
-void FileSystem::createFile(string fileName)
+bool FileSystem::createFile(string fileName)
 {
 	if(currentFile != NULLFILE)
 		closeFile();
 
+	if(indexMap.find(fileName) != indexMap.end())
+		return false;
 	char *newFileNameInSystem = new char[fileName.size()+1];
 	strcpy(newFileNameInSystem, fileName.c_str());
 	newFileNameInSystem[fileName.size()] = '\0';
@@ -106,7 +108,7 @@ void FileSystem::createFile(string fileName)
 	fileList->push_back(newFile);
 	indexMap[fileName] = fileList->size()-1;
 	++this->fileAmount;
-	return;
+	return true;
 }
 
 bool FileSystem::deleteFile(string fileName)

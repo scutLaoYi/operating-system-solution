@@ -42,7 +42,7 @@ class FileSystem
 	//function to list all file in system
 	void listFile();
 	//function to create a new file in system
-	void createFile(string fileName);
+	bool createFile(string fileName);
 	//function to remove a file from system
 	bool deleteFile(string fileName);
 	bool changeCurrentFile(string currentFile);
