@@ -73,6 +73,7 @@ union semun
 	void *__pad;
 };
 
+//该函数用于初始化信号量,sid为信号量集合id，index为索引值，value为待设定的数值
 void initSem(int sid, int index, int value)
 {
 	semun semopts;
@@ -81,6 +82,7 @@ void initSem(int sid, int index, int value)
 	return;
 }
 
+//该函数用于修改特定信号量的值，sid为信号量集合id，index为信号量的索引值，value为待修改的数值，其中value>0表示增加，value<0表示降低
 void modify(int sid, int index, int value)
 {
 	sembuf tbuf;
@@ -90,10 +92,26 @@ void modify(int sid, int index, int value)
 	semop(sid, &tbuf, 1);
 }
 
+void viewBuffer(void *ptr)
+{
+	int *counter = (int *)ptr;
+	char *bufPtr = (char *)((long long)ptr + sizeof(int *) * 2);
+	int cc(0);
+	for(int i = counter[0]; i != counter[1]; i++, i%=BUFFER_SIZE )
+	{
+		printf("%c ", bufPtr[i]);
+		++cc;
+	}
+	for(; cc < 15; ++cc)
+		printf("  ");
+	return;
+}
 
+//该函数用于从共享内存缓冲区中读取一个字符数据
 char pullChar(int shmId)
 {
 	void *spacePtr = shmat(shmId, NULL, 0);
+	viewBuffer(spacePtr); 
 
 	if(spacePtr == (void *)-1)
 	{
@@ -109,9 +127,11 @@ char pullChar(int shmId)
 	return temp;
 }
 
+//该函数用于向共享缓冲区中写入一个字符数据
 bool pushChar(int shmId, char cc)
 {
 	void *spacePtr = shmat(shmId, NULL, 0);
+	viewBuffer(spacePtr);
 
 	if(spacePtr == (void *)-1)
 	{
@@ -130,6 +150,20 @@ bool pushChar(int shmId, char cc)
 	return true;
 }
 
+void printTime()
+{
+	time_t rawtime;
+	struct tm * timeinfo;
+	char buffer[80];
+
+	time(&rawtime);
+	timeinfo = localtime(&rawtime);
+	strftime(buffer, 80, "%T:\t",timeinfo);
+
+	printf("%s", buffer);
+	return;
+}
+//大作业一的主函数，包含了程序运行的基本流程，调用上述函数完成功能
 int problemOne()
 {
 	//Creating a shared memory as buffer, and three semaphores
@@ -196,6 +230,7 @@ int problemOne()
 			modify(semId, SEM_FULL, -1);
 			//enter the critical region
 			modify(semId, SEM_MUTEX, -1);
+			printTime();
 			char get = pullChar(shmId);
 			if(get == '?')
 			{
@@ -203,7 +238,7 @@ int problemOne()
 			}
 			modify(semId, SEM_MUTEX, 1);
 			modify(semId, SEM_EMPTY, 1);
-			printf("From consumer:get %c\n", get);
+			printf("\tFrom consumer:\tget %c\n", get);
 		}
 	}
 	else
@@ -216,6 +251,7 @@ int problemOne()
 			modify(semId, SEM_EMPTY, -1);
 			modify(semId, SEM_MUTEX, -1);
 
+			printTime();
 			if(!pushChar(shmId, product))
 			{
 				printf("push char failed!Check your code again!\n");
@@ -224,7 +260,7 @@ int problemOne()
 
 			modify(semId, SEM_MUTEX, 1);
 			modify(semId, SEM_FULL, 1);
-			printf("From producer:push %c\n", product);
+			printf("\tFrom producer:\tpush %c\n", product);
 		}
 	}
 
